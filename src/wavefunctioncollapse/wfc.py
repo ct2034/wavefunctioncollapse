@@ -235,10 +235,9 @@ class WaveFuctionCollapse():
     
     def _noise_tile(self, seed, size):
         rng = np.random.default_rng(seed)
-        img = PIL.Image.new('1', (size, size), 0)
-        draw = ImageDraw.Draw(img)
-        for x, y in product(range(size), repeat=2):
-            draw.point((x, y), fill=rng.random()>0.7)
+        img = PIL.Image.fromarray(
+            rng.random((size, size)) > 0.9,
+            mode='1')
         return img
     
     def graphics(self):

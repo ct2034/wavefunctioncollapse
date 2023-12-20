@@ -32,7 +32,8 @@ sys.setrecursionlimit(16385)
 class ConsoleTile(Tile):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.res = 64
+        self.res = 60
+        self._graphics = None
 
     def __hash__(self) -> int:
         return hash(self.id)
@@ -42,17 +43,37 @@ class ConsoleTile(Tile):
         return self.name
     
     def graphics(self, seed=None):
+        if self._graphics is None:
+            self.cache_graphics(seed)
+        return self._graphics
+
+    def cache_graphics(self, seed):
         np.random.seed(seed)
         # print("graphics for", self.name)
 
         # based on image, create a clear image, that we want
         connectors = {n: False for n in Neig}  # where to draw connectors
-        if self.name != ' ':
-            for n in Neig:
-                for pn in self.neighs[n]:
-                    if pn is not ' ':
-                        connectors[n] = True
-                        break
+        if self.name == '+':
+            connectors = {n: True for n in Neig}
+        elif self.name == '-':
+            connectors[Neig.LEFT] = True
+            connectors[Neig.RIGHT] = True
+        elif self.name == '|':
+            connectors[Neig.UP] = True
+            connectors[Neig.DOWN] = True
+        elif self.name == 'r':
+            connectors[Neig.DOWN] = True
+            connectors[Neig.RIGHT] = True
+        elif self.name == '7':
+            connectors[Neig.DOWN] = True
+            connectors[Neig.LEFT] = True
+        elif self.name == 'J':
+            connectors[Neig.UP] = True
+            connectors[Neig.LEFT] = True
+        elif self.name == 'L':
+            connectors[Neig.UP] = True
+            connectors[Neig.RIGHT] = True
+
         # print("connectors", connectors)
         
         # draw our tile
@@ -63,7 +84,7 @@ class ConsoleTile(Tile):
             mid + np.random.normal(0, self.res // 16.),
             mid + np.random.normal(0, self.res // 16.)
         )
-        width = self.res // 8
+        width = self.res // 20
 
         if any(connectors.values()):
             draw.ellipse(
@@ -89,8 +110,7 @@ class ConsoleTile(Tile):
                      end_bit[0] + width//2, 
                      end_bit[1] + width//2], 
                     fill=1)
-        
-        return img
+        self._graphics = img
                 
     @property
     def graphics_size(self):
@@ -108,8 +128,8 @@ def main():
         ),
         ConsoleTile(
             '-', '─',
-            neig_dn=[' '],
-            neig_up=[' '],
+            neig_dn=[' ', '-', 'r', '7'],
+            neig_up=[' ', '-', 'J', 'L'],
             neig_lt=['+', '-', 'r', 'L'],
             neig_rt=['+', '-', '7', 'J']
         ),
@@ -117,8 +137,8 @@ def main():
             '|', '│',
             neig_dn=['+', '|', 'J', 'L'],
             neig_up=['+', '|', 'r', '7'],
-            neig_lt=[' '],
-            neig_rt=[' ']
+            neig_lt=[' ', '|', 'J', '7'],
+            neig_rt=[' ', '|', 'r', 'L']
         ),
         ConsoleTile(
             ' ', ' ',
@@ -130,34 +150,37 @@ def main():
         ConsoleTile(
             'r', '┌',
             neig_dn=['|', 'J', '+', 'L'],
-            neig_up=[' '],
-            neig_lt=[' '],
+            neig_up=[' ', '-', 'J', 'L'],
+            neig_lt=[' ', '|', 'J', '7'],
             neig_rt=['-', 'J', '+', '7'],
         ),
         ConsoleTile(
             '7', '┐',
             neig_dn=['|', 'J', '+', 'L'],
-            neig_up=[' '],
+            neig_up=[' ', '-', 'J', 'L'],
             neig_lt=['-', 'r', '+', 'L'],
-            neig_rt=[' '],
+            neig_rt=[' ', '|', 'r', 'L'],
         ),
         ConsoleTile(
             'J', '┘',
-            neig_dn=[' '],
+            neig_dn=[' ', '-', 'r', '7'],
             neig_up=['|', 'r', '+', '7'],
             neig_lt=['-', 'r', '+', 'L'],
-            neig_rt=[' '],
+            neig_rt=[' ', '|', 'r', 'L'],
         ),
         ConsoleTile(
             'L', '└',
-            neig_dn=[' '],
+            neig_dn=[' ', '-', 'r', '7'],
             neig_up=['|', 'r', '+', '7'],
-            neig_lt=[' '],
+            neig_lt=[' ', '|', 'J', '7'],
             neig_rt=['-', '7', '+', 'J'],
         ),
     ]
 
-    wfc = WaveFuctionCollapse(tiles, (10, 10))
+    wfc = WaveFuctionCollapse(tiles, (32, 18))
+
+    cv2.namedWindow('image', cv2.WND_PROP_FULLSCREEN)
+    cv2.setWindowProperty('image',cv2.WND_PROP_FULLSCREEN,cv2.WINDOW_FULLSCREEN)
 
     def progress_callback(wfc, _, __):
         image = wfc.graphics()
