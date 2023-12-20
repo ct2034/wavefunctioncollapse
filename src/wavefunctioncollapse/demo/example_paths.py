@@ -18,6 +18,8 @@
 
 import sys
 import time
+import os
+import imageio
 
 from wavefunctioncollapse.wfc import Tile, WaveFuctionCollapse, Neig
 
@@ -88,8 +90,8 @@ class ConsoleTile(Tile):
             col = (v, v, v) 
 
             rand_mid = (
-                mid + rng.normal(0, self.res // 8.) * oversample,
-                mid + rng.normal(0, self.res // 8.) * oversample
+                mid + rng.normal(0, self.res // 12) * oversample,
+                mid + rng.normal(0, self.res // 12) * oversample
             )
             width = self.res // 40 * oversample
 
@@ -191,13 +193,29 @@ def main():
     cv2.namedWindow('image', cv2.WND_PROP_FULLSCREEN)
     cv2.setWindowProperty('image',cv2.WND_PROP_FULLSCREEN,cv2.WINDOW_FULLSCREEN)
 
-    def progress_callback(wfc, _, __):
+    # directory for saving the progress images
+    IMG_FOLDER = "img"
+    if not os.path.exists(IMG_FOLDER):
+        os.makedirs(IMG_FOLDER)
+    else:
+        for f in os.listdir(IMG_FOLDER):
+            os.remove(os.path.join(IMG_FOLDER, f))
+
+    def progress_callback(wfc, i, i_max):
+        digits = len(str(i_max))
+        str_i = str(i).zfill(digits)
         image = wfc.graphics()
         cv2.imshow("image", np.array(image))
-        time.sleep(0.1)
+        # time.sleep(0.1)
+        cv2.imwrite(os.path.join(IMG_FOLDER, f"{str_i}.png"), np.array(image))
         cv2.waitKey(1)
 
     wfc.generate(progress_callback)
+
+    with imageio.get_writer(os.path.join(IMG_FOLDER, 'wfc.gif'), mode='I') as writer:
+        for filename in sorted(os.listdir(IMG_FOLDER)):
+            image = imageio.imread(os.path.join(IMG_FOLDER, filename))
+            writer.append_data(image)
     cv2.waitKey(0)
 
     print("\n\n")
