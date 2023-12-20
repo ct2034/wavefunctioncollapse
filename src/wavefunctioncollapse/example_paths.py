@@ -17,76 +17,78 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import sys
+
+from .wfc import Tile, WaveFuctionCollapse
+
 sys.setrecursionlimit(16385)
 
-from .wfc import WaveFuctionCollapse, Tile
-from typing import Union
 
 class ConsoleTile(Tile):
     def __hash__(self) -> int:
         return hash(self.id)
-    
+
     @property
     def id(self):
         return self.name
+
 
 def main():
     tiles = [
         ConsoleTile(
             '+', '┼',
-            neig_dn = ['+', '|', 'J', 'L'],
-            neig_up = ['+', '|', 'r', '7'],
-            neig_lt = ['+', '-', 'r', 'L'],
-            neig_rt = ['+', '-', '7', 'J']
+            neig_dn=['+', '|', 'J', 'L'],
+            neig_up=['+', '|', 'r', '7'],
+            neig_lt=['+', '-', 'r', 'L'],
+            neig_rt=['+', '-', '7', 'J']
         ),
         ConsoleTile(
             '-', '─',
-            neig_dn = [' '],
-            neig_up = [' '],
-            neig_lt = ['+', '-', 'r', 'L'],
-            neig_rt = ['+', '-', '7', 'J']
+            neig_dn=[' '],
+            neig_up=[' '],
+            neig_lt=['+', '-', 'r', 'L'],
+            neig_rt=['+', '-', '7', 'J']
         ),
         ConsoleTile(
             '|', '│',
-            neig_dn = ['+', '|', 'J', 'L'],
-            neig_up = ['+', '|', 'r', '7'],
-            neig_lt = [' '],
-            neig_rt = [' ']
+            neig_dn=['+', '|', 'J', 'L'],
+            neig_up=['+', '|', 'r', '7'],
+            neig_lt=[' '],
+            neig_rt=[' ']
         ),
         ConsoleTile(
             ' ', ' ',
-            neig_dn = [' ', '-', 'r', '7'],
-            neig_up = [' ', '-', 'J', 'L'],
-            neig_lt = [' ', '|', 'J', '7'],
-            neig_rt = [' ', '|', 'r', 'L']
+            neig_dn=[' ', '-', 'r', '7'],
+            neig_up=[' ', '-', 'J', 'L'],
+            neig_lt=[' ', '|', 'J', '7'],
+            neig_rt=[' ', '|', 'r', 'L']
         ),
         ConsoleTile(
             'r', '┌',
-            neig_dn = ['|', 'J', '+', 'L'],
-            neig_up = [' '],
-            neig_lt = [' '],
-            neig_rt = ['-', 'J', '+', '7'],
+            neig_dn=['|', 'J', '+', 'L'],
+            neig_up=[' '],
+            neig_lt=[' '],
+            neig_rt=['-', 'J', '+', '7'],
         ),
         ConsoleTile(
             '7', '┐',
-            neig_dn = ['|', 'J', '+', 'L'],
-            neig_up = [' '],
-            neig_lt = ['-', 'r', '+', 'L'],
-            neig_rt = [' '],
+            neig_dn=['|', 'J', '+', 'L'],
+            neig_up=[' '],
+            neig_lt=['-', 'r', '+', 'L'],
+            neig_rt=[' '],
         ),
         ConsoleTile(
             'J', '┘',
-            neig_dn = [' '],
-            neig_up = ['|', 'r', '+', '7'],
-            neig_lt = ['-', 'r', '+', 'L'],
-            neig_rt = [' '],
+            neig_dn=[' '],
+            neig_up=['|', 'r', '+', '7'],
+            neig_lt=['-', 'r', '+', 'L'],
+            neig_rt=[' '],
         ),
         ConsoleTile(
             'L', '└',
-            neig_dn = [' '],
-            neig_up = ['|', 'r', '+', '7'],
-            neig_lt = [' '],
-            neig_rt = ['-', '7', '+', 'J'],
+            neig_dn=[' '],
+            neig_up=['|', 'r', '+', '7'],
+            neig_lt=[' '],
+            neig_rt=['-', '7', '+', 'J'],
         ),
     ]
 
@@ -96,6 +98,7 @@ def main():
     print("\n\n")
     print("done")
     print(str(wfc))
+
 
 if __name__ == '__main__':
     main()

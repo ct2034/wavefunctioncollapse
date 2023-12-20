@@ -18,3 +18,9 @@ classifiers = [
 [project.scripts]
 wfc_example_boxes = "wavefunctioncollapse.example_boxes:main"
 wfc_example_paths = "wavefunctioncollapse.example_paths:main"
+
+[tool.pylint.messages_control]
+disable = [
+    "missing-docstring",
+    "too-many-arguments", # src/wavefunctioncollapse/wfc.py#L53
+    ]
