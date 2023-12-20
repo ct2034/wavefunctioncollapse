@@ -17,8 +17,11 @@
 import abc
 from enum import auto, Enum
 from typing import List, Set
+from itertools import product
 
 import numpy as np
+import PIL.Image
+from PIL import ImageFont, ImageDraw
 
 
 class Neig(Enum):
@@ -72,6 +75,13 @@ class Tile():
 
     def __eq__(self, __value) -> bool:
         return self.id == __value.id
+    
+    def graphics(self):
+        raise NotImplementedError
+    
+    @property
+    def graphics_size(self) -> int:
+        raise NotImplementedError
 
     @abc.abstractmethod
     def __hash__(self) -> int:
@@ -182,7 +192,7 @@ class WaveFuctionCollapse():
         # print('>' + ','.join([tile_id for tile_id in possible_tiles]) + '<')
         return possible_tiles
 
-    def generate(self):
+    def generate(self, progess_callback=None):
         """Generate a grid using the wave function collapse algorithm."""
         i = 0
         i_max = self.size[0] * self.size[1]
@@ -215,7 +225,44 @@ class WaveFuctionCollapse():
                                for _ in range(self.size[1])]
             print(str(self) + '\n')
 
+            if progess_callback is not None:
+                progess_callback(self, i, i_max)
+
             i += 1
             if i > i_max:
                 raise RuntimeError(f"Max iterations reached ({i_max})")
         return self.grid
+    
+    def _noise_tile(self, seed, size):
+        rng = np.random.default_rng(seed)
+        img = PIL.Image.new('1', (size, size), 0)
+        draw = ImageDraw.Draw(img)
+        for x, y in product(range(size), repeat=2):
+            draw.point((x, y), fill=rng.random()>0.7)
+        return img
+    
+    def graphics(self):
+        """Return a PIL image of the grid."""
+        tilesize = self.tiles[0].graphics_size
+        img = PIL.Image.new(
+            'RGB', (self.size[0] * tilesize,
+                    self.size[1] * tilesize))
+        for ix, row in enumerate(self.grid):
+            for iy, tile_id in enumerate(row):
+                seed = ix*len(row)+iy
+                if tile_id is None:
+                    tileimg = self._noise_tile(seed, tilesize)
+                else:
+                    tile = self.tiles_by_id[tile_id]
+                    tileimg = tile.graphics(seed)
+                img.paste(
+                    tileimg,
+                    (
+                        iy * tilesize,
+                        ix * tilesize,
+                        (iy + 1) * tilesize,
+                        (ix + 1) * tilesize
+                    )
+                )
+        return img
+

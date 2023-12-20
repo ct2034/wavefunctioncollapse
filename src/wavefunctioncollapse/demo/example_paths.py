@@ -17,19 +17,84 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import sys
+import time
 
-from wavefunctioncollapse.wfc import Tile, WaveFuctionCollapse
+from wavefunctioncollapse.wfc import Tile, WaveFuctionCollapse, Neig
+
+import cv2
+import numpy as np
+import PIL.Image
+from PIL import ImageFont, ImageDraw
 
 sys.setrecursionlimit(16385)
 
 
 class ConsoleTile(Tile):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.res = 64
+
     def __hash__(self) -> int:
         return hash(self.id)
 
     @property
     def id(self):
         return self.name
+    
+    def graphics(self, seed=None):
+        np.random.seed(seed)
+        # print("graphics for", self.name)
+
+        # based on image, create a clear image, that we want
+        connectors = {n: False for n in Neig}  # where to draw connectors
+        if self.name != ' ':
+            for n in Neig:
+                for pn in self.neighs[n]:
+                    if pn is not ' ':
+                        connectors[n] = True
+                        break
+        # print("connectors", connectors)
+        
+        # draw our tile
+        img = PIL.Image.new('1', (self.res, self.res), 0)
+        draw = ImageDraw.Draw(img)
+        mid = self.res // 2
+        rand_mid = (
+            mid + np.random.normal(0, self.res // 16.),
+            mid + np.random.normal(0, self.res // 16.)
+        )
+        width = self.res // 8
+
+        if any(connectors.values()):
+            draw.ellipse(
+                [rand_mid[0] - width//2, 
+                rand_mid[1] - width//2, 
+                rand_mid[0] + width//2, 
+                rand_mid[1] + width//2], 
+                fill=1)
+        for n in Neig:
+            if connectors[n]:
+                if n == Neig.UP:
+                    end_bit = (mid, 0)
+                elif n == Neig.DOWN:
+                    end_bit = (mid, self.res)
+                elif n == Neig.LEFT:
+                    end_bit = (0, mid)
+                elif n == Neig.RIGHT:
+                    end_bit = (self.res, mid)
+                draw.line([end_bit, rand_mid], fill=1, width=width, joint='curve')
+                draw.ellipse(
+                    [end_bit[0] - width//2, 
+                     end_bit[1] - width//2, 
+                     end_bit[0] + width//2, 
+                     end_bit[1] + width//2], 
+                    fill=1)
+        
+        return img
+                
+    @property
+    def graphics_size(self):
+        return self.res
 
 
 def main():
@@ -92,12 +157,21 @@ def main():
         ),
     ]
 
-    wfc = WaveFuctionCollapse(tiles, (30, 10))
-    wfc.generate()
+    wfc = WaveFuctionCollapse(tiles, (10, 10))
+
+    def progress_callback(wfc, _, __):
+        image = wfc.graphics()
+        cv2.imshow("image", np.array(image))
+        time.sleep(0.1)
+        cv2.waitKey(1)
+
+    wfc.generate(progress_callback)
+    cv2.waitKey(0)
 
     print("\n\n")
     print("done")
     print(str(wfc))
+
 
 
 if __name__ == '__main__':

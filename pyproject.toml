@@ -16,8 +16,8 @@ classifiers = [
 ]
 
 [project.scripts]
-wfc_example_boxes = "wavefunctioncollapse.example_boxes:main"
-wfc_example_paths = "wavefunctioncollapse.example_paths:main"
+wfc_example_boxes = "wavefunctioncollapse.demo.example_boxes:main"
+wfc_example_paths = "wavefunctioncollapse.demo.example_paths:main"
 
 [tool.pylint.messages_control]
 disable = [
