@@ -1,5 +1,8 @@
 # Wave Function Collapse
 
+This is obviously insprired by [mxgmn/WaveFunctionCollapse](https://github.com/mxgmn/WaveFunctionCollapse).
+I wanted to implement the algorithm myself to get a better understanding of it.
+
 - The idea is to provide a generic library, implemented in [`wfc.py`](src/wavefunctioncollapse/wfc.py), that the user has to provide with a tileset.
 - Note that the implementation is not complete:
     - During execution there may be a case where no possible tiles can be found
