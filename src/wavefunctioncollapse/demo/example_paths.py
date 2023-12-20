@@ -33,7 +33,7 @@ class ConsoleTile(Tile):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.res = 60
-        self._graphics = None
+        self._graphics = {}
 
     def __hash__(self) -> int:
         return hash(self.id)
@@ -43,12 +43,13 @@ class ConsoleTile(Tile):
         return self.name
     
     def graphics(self, seed=None):
-        if self._graphics is None:
-            self.cache_graphics(seed)
-        return self._graphics
+        if seed not in self._graphics:
+            self._graphics[seed] = self.cache_graphics(seed)
+        return self._graphics[seed]
 
     def cache_graphics(self, seed):
-        np.random.seed(seed)
+        rng = np.random.RandomState(seed)
+        print(seed)
         # print("graphics for", self.name)
 
         # based on image, create a clear image, that we want
@@ -80,37 +81,39 @@ class ConsoleTile(Tile):
         img = PIL.Image.new('1', (self.res, self.res), 0)
         draw = ImageDraw.Draw(img)
         mid = self.res // 2
-        rand_mid = (
-            mid + np.random.normal(0, self.res // 16.),
-            mid + np.random.normal(0, self.res // 16.)
-        )
-        width = self.res // 20
 
-        if any(connectors.values()):
-            draw.ellipse(
-                [rand_mid[0] - width//2, 
-                rand_mid[1] - width//2, 
-                rand_mid[0] + width//2, 
-                rand_mid[1] + width//2], 
-                fill=1)
-        for n in Neig:
-            if connectors[n]:
-                if n == Neig.UP:
-                    end_bit = (mid, 0)
-                elif n == Neig.DOWN:
-                    end_bit = (mid, self.res)
-                elif n == Neig.LEFT:
-                    end_bit = (0, mid)
-                elif n == Neig.RIGHT:
-                    end_bit = (self.res, mid)
-                draw.line([end_bit, rand_mid], fill=1, width=width, joint='curve')
+        for _ in range(rng.randint(1, 5)):
+            rand_mid = (
+                mid + rng.normal(0, self.res // 8.),
+                mid + rng.normal(0, self.res // 8.)
+            )
+            width = self.res // 40
+
+            if any(connectors.values()):
                 draw.ellipse(
-                    [end_bit[0] - width//2, 
-                     end_bit[1] - width//2, 
-                     end_bit[0] + width//2, 
-                     end_bit[1] + width//2], 
+                    [rand_mid[0] - width//2, 
+                    rand_mid[1] - width//2, 
+                    rand_mid[0] + width//2, 
+                    rand_mid[1] + width//2], 
                     fill=1)
-        self._graphics = img
+            for n in Neig:
+                if connectors[n]:
+                    if n == Neig.UP:
+                        end_bit = (mid, 0)
+                    elif n == Neig.DOWN:
+                        end_bit = (mid, self.res)
+                    elif n == Neig.LEFT:
+                        end_bit = (0, mid)
+                    elif n == Neig.RIGHT:
+                        end_bit = (self.res, mid)
+                    draw.line([end_bit, rand_mid], fill=1, width=width, joint='curve')
+                    draw.ellipse(
+                        [end_bit[0] - width//2, 
+                        end_bit[1] - width//2, 
+                        end_bit[0] + width//2, 
+                        end_bit[1] + width//2], 
+                        fill=1)
+        return img
                 
     @property
     def graphics_size(self):
