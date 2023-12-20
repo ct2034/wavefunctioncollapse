@@ -236,13 +236,13 @@ class WaveFuctionCollapse():
     def _overlay_all_possible_tiles(self, seed, possible_tiles):
         """Overlay all possible tiles."""
         tilesize = self.tiles[0].graphics_size
-        img_np = np.zeros((tilesize, tilesize, 3), dtype=np.uint8)
+        img_np = np.zeros((tilesize, tilesize, 3), dtype=np.float32)
         n = len(possible_tiles)
         for tile_id in possible_tiles:
             tile = self.tiles_by_id[tile_id]
             tileimg = tile.graphics(seed)
-            img_np += np.array(tileimg, dtype=np.uint8) // n
-        return PIL.Image.fromarray(img_np.astype(np.uint8))
+            img_np += (np.array(tileimg, dtype=np.float32) / n / 255.0)
+        return PIL.Image.fromarray((img_np * 255).astype(np.uint8))
     
     def graphics(self):
         """Return a PIL image of the grid."""
