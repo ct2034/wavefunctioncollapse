@@ -37,3 +37,5 @@ jobs:
       run: |
         cd src
         pytest ../test
+      env:
+        PYTHONPATH: src
