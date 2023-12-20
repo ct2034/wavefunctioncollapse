@@ -33,9 +33,9 @@ jobs:
     - name: Lint with pylint
       run: |
         pylint src/wavefunctioncollapse/
+    - name: Install package
+      run: |
+        pip install .
     - name: Test with pytest
       run: |
-        cd src
-        pytest ../test
-      env:
-        PYTHONPATH: src
+        pytest
