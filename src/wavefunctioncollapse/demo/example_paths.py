@@ -49,7 +49,7 @@ class ConsoleTile(Tile):
 
     def cache_graphics(self, seed):
         rng = np.random.RandomState(seed)
-        print(seed)
+        # print(seed)
         # print("graphics for", self.name)
 
         # based on image, create a clear image, that we want
@@ -78,16 +78,20 @@ class ConsoleTile(Tile):
         # print("connectors", connectors)
         
         # draw our tile
-        img = PIL.Image.new('1', (self.res, self.res), 0)
+        oversample = 4
+        img = PIL.Image.new('RGB', (self.res * oversample, self.res * oversample), 0)
         draw = ImageDraw.Draw(img)
-        mid = self.res // 2
+        mid = self.res // 2 * oversample
 
-        for _ in range(rng.randint(1, 5)):
+        for _ in range(rng.randint(1, 3)):
+            v = rng.randint(200, 256)
+            col = (v, v, v) 
+
             rand_mid = (
-                mid + rng.normal(0, self.res // 8.),
-                mid + rng.normal(0, self.res // 8.)
+                mid + rng.normal(0, self.res // 8.) * oversample,
+                mid + rng.normal(0, self.res // 8.) * oversample
             )
-            width = self.res // 40
+            width = self.res // 40 * oversample
 
             if any(connectors.values()):
                 draw.ellipse(
@@ -95,24 +99,26 @@ class ConsoleTile(Tile):
                     rand_mid[1] - width//2, 
                     rand_mid[0] + width//2, 
                     rand_mid[1] + width//2], 
-                    fill=1)
+                    fill=col)
             for n in Neig:
                 if connectors[n]:
                     if n == Neig.UP:
                         end_bit = (mid, 0)
                     elif n == Neig.DOWN:
-                        end_bit = (mid, self.res)
+                        end_bit = (mid, self.res * oversample)
                     elif n == Neig.LEFT:
                         end_bit = (0, mid)
                     elif n == Neig.RIGHT:
-                        end_bit = (self.res, mid)
-                    draw.line([end_bit, rand_mid], fill=1, width=width, joint='curve')
+                        end_bit = (self.res * oversample, mid)
+                    draw.line([end_bit, rand_mid], fill=col, width=width, joint='curve')
                     draw.ellipse(
                         [end_bit[0] - width//2, 
                         end_bit[1] - width//2, 
                         end_bit[0] + width//2, 
                         end_bit[1] + width//2], 
-                        fill=1)
+                        fill=col)
+                    
+        img = img.resize((self.res, self.res), PIL.Image.LANCZOS)
         return img
                 
     @property

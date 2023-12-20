@@ -233,12 +233,16 @@ class WaveFuctionCollapse():
                 raise RuntimeError(f"Max iterations reached ({i_max})")
         return self.grid
     
-    def _noise_tile(self, seed, size):
-        rng = np.random.default_rng(seed)
-        img = PIL.Image.fromarray(
-            rng.random((size, size)) > 0.9,
-            mode='1')
-        return img
+    def _overlay_all_possible_tiles(self, seed, possible_tiles):
+        """Overlay all possible tiles."""
+        tilesize = self.tiles[0].graphics_size
+        img_np = np.zeros((tilesize, tilesize, 3), dtype=np.uint8)
+        n = len(possible_tiles)
+        for tile_id in possible_tiles:
+            tile = self.tiles_by_id[tile_id]
+            tileimg = tile.graphics(seed)
+            img_np += np.array(tileimg, dtype=np.uint8) // n
+        return PIL.Image.fromarray(img_np.astype(np.uint8))
     
     def graphics(self):
         """Return a PIL image of the grid."""
@@ -250,7 +254,8 @@ class WaveFuctionCollapse():
             for iy, tile_id in enumerate(row):
                 seed = ix*len(row)+iy
                 if tile_id is None:
-                    tileimg = self._noise_tile(seed, tilesize)
+                    possible_tiles = self.possible_tiles[ix][iy]
+                    tileimg = self._overlay_all_possible_tiles(seed, possible_tiles)
                 else:
                     tile = self.tiles_by_id[tile_id]
                     tileimg = tile.graphics(seed)
