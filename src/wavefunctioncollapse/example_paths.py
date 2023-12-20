@@ -18,7 +18,7 @@
 
 import sys
 
-from .wfc import Tile, WaveFuctionCollapse
+from wavefunctioncollapse.wfc import Tile, WaveFuctionCollapse
 
 sys.setrecursionlimit(16385)
 
