@@ -35,4 +35,4 @@ jobs:
         pylint src/wavefunctioncollapse/
     - name: Test with pytest
       run: |
-        pytest-3
+        pytest .
