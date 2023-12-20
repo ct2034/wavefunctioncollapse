@@ -1,0 +1,20 @@
+[build-system]
+requires = ["flit_core>=3.4"]
+build-backend = "flit_core.buildapi"
+
+[project]
+name = "wavefunctioncollapse"
+version = "0.0.1"
+authors = [
+  { name="Christian Henkel", email="post@henkelchristian.de" },
+]
+description = "Trying a wavefunction collapse algorithm in Python"
+readme = "README.md"
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Python :: 3",
+]
+
+[project.scripts]
+wfc_example_boxes = "wavefunctioncollapse.example_boxes:main"
+wfc_example_paths = "wavefunctioncollapse.example_paths:main"
